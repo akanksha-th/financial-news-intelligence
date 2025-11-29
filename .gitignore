@@ -39,6 +39,7 @@ ENV/
 # -----------------------------
 # DATABASES (VERY IMPORTANT)
 # -----------------------------
+data/
 data/*.db
 data/*.db-wal
 data/*.db-shm
