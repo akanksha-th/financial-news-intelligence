@@ -1,0 +1,146 @@
+# -----------------------------
+# PYTHON
+# -----------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.pkl
+*.swp
+*.log
+
+# Virtual environments
+venv/
+.env/
+.venv/
+.multi_agent_langgraph/
+.multi_agent_langgraph/*
+env/
+ENV/
+
+# Byte-compiled
+*.so
+*.dll
+*.dylib
+
+# -----------------------------
+# JUPYTER NOTEBOOKS
+# -----------------------------
+.ipynb_checkpoints/
+*.ipynb_checkpoints/*
+
+# Avoid saving huge notebook output cells
+# (Optional, but recommended if notebooks get large)
+**/.ipynb_checkpoints/*
+*.nb.html
+*/.jupyter_cache/
+
+# -----------------------------
+# DATABASES (VERY IMPORTANT)
+# -----------------------------
+data/*.db
+data/*.db-wal
+data/*.db-shm
+data/*.sqlite
+data/*.sqlite3
+data/**/*.db*
+*.db
+*.sqlite
+
+# -----------------------------
+# VECTOR STORES / RAG INDEXES
+# -----------------------------
+# FAISS index files
+*.faiss
+*.index
+
+# ChromaDB storage
+chroma/
+chroma_db/
+vectorstore/
+vector_store/
+db/
+
+# -----------------------------
+# LOGS, CACHE, TEMP
+# -----------------------------
+logs/
+*.log
+*.tmp
+*.temp
+*.bak
+*.old
+*.cache
+.cache/
+__cache__/
+*.pid
+
+# HuggingFace cache
+.huggingface/
+transformers_cache/
+~/.cache/huggingface/
+
+# Pip cache
+pip-selfcheck.json
+
+# -----------------------------
+# OS / EDITOR FILES
+# -----------------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+*.lnk
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+*.iml
+
+# -----------------------------
+# ENVIRONMENT / SECRET KEYS
+# -----------------------------
+*.env
+.env.*
+.envrc
+*.secret
+secrets/
+config.ini
+config.json
+
+# -----------------------------
+# MODEL WEIGHTS / CHECKPOINTS
+# -----------------------------
+*.bin
+*.safetensors
+*.pt
+*.pth
+*.ckpt
+
+# -----------------------------
+# BUILD / DIST
+# -----------------------------
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+MANIFEST
+
+# -----------------------------
+# PROJECT SPECIFIC
+# -----------------------------
+
+# Do not commit scraped data or intermediate JSON dumps
+data/raw/
+data/processed/
+data/temp/
+data/*.json
+
+# LangGraph flow artifacts
+langgraph_cache/
+graph_state/
+graph_temp/
