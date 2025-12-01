@@ -61,9 +61,9 @@ def cluster_articles(state: DeDupState) -> DeDupState:
 
         cluster = []
         for j, dist in zip(neighbors, distances[i]):
-            if l2_to_cos() > 0.80:
+            if l2_to_cos(dist) > 0.80:
                 cluster.append(j)
-                visited.append(j)
+                visited.add(j)
         clusters.append((cluster))
 
     state["clusters"] = clusters
@@ -82,7 +82,7 @@ def save_stories(state: DeDupState) -> DeDupState:
     for cluster in clusters:
         articles = [df[i] for i in cluster]
         story = {
-            "article_ids": [a[id] for a in articles],
+            "article_ids": [a["id"] for a in articles],
             "article_title": articles[0]["title"],
             "combined_text": " ".join([a["title"] for a in articles]),
             "num_articles": len(articles),
@@ -96,7 +96,7 @@ def save_stories(state: DeDupState) -> DeDupState:
 def build_dedup_graph():
     graph = StateGraph(DeDupState)
 
-    graph.add_node("load_articles", load_articles())
+    graph.add_node("load_articles", load_articles)
     graph.add_node("embed_articles", embed_articles)
     graph.add_node("cluster_articles", cluster_articles)
     graph.add_node("save_stories", save_stories)
@@ -107,7 +107,7 @@ def build_dedup_graph():
     graph.add_edge("cluster_articles", "save_stories")
     graph.add_edge("save_stories", END)
     
-    return graph.compile
+    return graph.compile()
 
 if __name__ == "__main__":
     # run on CLI using "python -m src.agents.deduplication_agent"

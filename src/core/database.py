@@ -107,7 +107,7 @@ def create_unique_stories_table():
                 article_title TEXT,
                 combined_text TEXT,
                 num_articles INT,
-                created_at TIMESTAMP DEAFULT CURRENT_TIMESTAMP
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """
         )
@@ -128,7 +128,7 @@ def insert_unique_stories(story: Dict):
 
         cur.execute(
             """
-            INSERT INTO raw_news (article_ids, article_title, combined_text, num_articles)
+            INSERT INTO unique_news (article_ids, article_title, combined_text, num_articles)
             VALUES (%s, %s, %s, %s)
             """, 
             (
