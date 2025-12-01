@@ -1,0 +1,34 @@
+{
+    "regulators": [
+        "RBI", "SEBI", "IRDAI", "AMFI", "MCA", "IBBI", "PFRDA", "FMC", "NHB", "IMF", "FSB", "BIS", "BCBS", "SEC", "ECB", "FCA"
+    ],
+
+    "indices": [
+        "NIFTY", "NIFTY 50", "BANK NIFTY", "SENSEX", "NASDAQ", "DOW JONES", "FTSE"
+    ],
+
+    "sectors": [
+        "IT", "PHARMA", "FMCG", "AUTO", "BANKING",
+        "FINANCIALS", "REAL ESTATE", "METALS", "ENERGY", "OIL & GAS",
+        "Healthcare", "Consumer Discretionary", "Communication Services", "Industrials", "Energy",
+        "Materials", "Agriculture", "Manufacturing", "Consumer Staples"
+    ],
+
+    "financial_terms": [
+        "repo rate", "inflation", "gdp", "interest rate", "liquidity",
+        "bond yield", "fiscal deficit", "loan growth", "credit demand", "stocks"
+    ],
+
+    "kpi_terms": [
+        "Q1", "Q2", "Q3", "Q4", "EBITDA", "PAT", "EPS",
+        "profit", "revenue", "margin", "operating profit"
+    ],
+
+    "companies_custom": [
+        "HDFC Bank", "Reliance", "Infosys", "TCS", "ICICI Bank", "Axis Bank"
+    ],
+
+    "products": [
+        "ETF", "Mutual Fund", "Derivatives", "Futures", "Options", "IPO"
+    ]
+}
