@@ -1,0 +1,10 @@
+langgraph
+pandas
+faiss-cpu
+feedparser
+tqdm
+sentence-transformers
+psycopg2
+dotenv
+torch
+transformers
