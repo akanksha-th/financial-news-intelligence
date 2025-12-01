@@ -29,6 +29,11 @@ def get_db_connection():
     finally:
         conn.close()
 
+
+# ==========================================
+# Ingestion Agent Utilities
+# ==========================================
+
 def create_table():
     with get_db_connection() as conn:
         cur = conn.cursor()
@@ -65,6 +70,72 @@ def insert_raw_articles(article: Dict):
                 article["title"],
                 article["content"],
                 article["published_at"]
+            ),
+        )
+        
+        conn.commit()
+        cur.close()
+
+
+# ==========================================
+# DeDuplication Agent Utilities
+# ==========================================
+
+def fetch_raw_articles():
+    """Fetches raw articles from the raw_news table for deduplication"""
+    with get_db_connection() as conn:
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute(
+            """
+            SELECT id, title, content from raw_news ORDER BY id;
+            """
+        )
+        rows = cur.fetchall()
+        cur.close()
+    return rows
+
+def create_unique_stories_table():
+    """Creates a new table to store dedupicated news stories"""
+    with get_db_connection() as conn:
+        cur = conn.cursor()
+
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS unique_news (
+                id SERIAL PRIMARY KEY,
+                article_ids TEXT,
+                article_title TEXT,
+                combined_text TEXT,
+                num_articles INT,
+                created_at TIMESTAMP DEAFULT CURRENT_TIMESTAMP
+                );
+            """
+        )
+
+        conn.commit()
+        cur.close()
+
+def insert_unique_stories(story: Dict):
+    """
+    story = {
+        'article_ids': [...],
+        'article'_title': str,
+        'combined_text': str,
+        'num_articles': int
+    """
+    with get_db_connection() as conn:
+        cur = conn.cursor()
+
+        cur.execute(
+            """
+            INSERT INTO raw_news (article_ids, article_title, combined_text, num_articles)
+            VALUES (%s, %s, %s, %s)
+            """, 
+            (
+                str(story["article_ids"]),
+                story["article_title"],
+                story["combined_text"],
+                story["num_articles"],
             ),
         )
         
