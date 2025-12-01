@@ -84,7 +84,7 @@ def save_stories(state: DeDupState) -> DeDupState:
         story = {
             "article_ids": [a["id"] for a in articles],
             "article_title": articles[0]["title"],
-            "combined_text": " ".join([a["title"] for a in articles]),
+            "combined_text": " ".join([a["content"] for a in articles]),
             "num_articles": len(articles),
         }
         stories.append(story)
