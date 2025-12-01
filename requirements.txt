@@ -8,3 +8,4 @@ psycopg2
 dotenv
 torch
 transformers
+spacy
