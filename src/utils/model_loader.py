@@ -12,7 +12,7 @@ def get_snapshot_folder(local_dir: str):
     snapshot_dirs = list(base.glob("**/snapshots/*"))
     if len(snapshot_dirs) == 0:
         return None
-    return snapshot_dirs
+    return snapshot_dirs[0]
 
 def load_local_or_download(model_name: str, local_dir: str, task: str = "ner"):
     """Loads a HuggingFace model from local directory, if exists. Otherwise downloads and caches it."""
@@ -22,8 +22,8 @@ def load_local_or_download(model_name: str, local_dir: str, task: str = "ner"):
 
     if snapshot:
         print(f"[Model Loader] Loading model locally from {snapshot}.")
-        tokenizer = AutoTokenizer.from_pretrained(snapshot)
-        model = AutoModelForTokenClassification.from_pretrained(snapshot)
+        tokenizer = AutoTokenizer.from_pretrained(snapshot, local_files_only=True)
+        model = AutoModelForTokenClassification.from_pretrained(snapshot, local_files_only=True)
 
     else:
         print(f"[Model Loader] Local model not found. Downloading {model_name} ...")
