@@ -8,8 +8,8 @@
     ],
 
     "sectors": [
-        "IT", "PHARMA", "FMCG", "AUTO", "BANKING",
-        "FINANCIALS", "REAL ESTATE", "METALS", "ENERGY", "OIL & GAS",
+        "IT sector", "IT stocks", "IT services", "Information Technology", "PHARMA", "FMCG", "AUTO", "BANKING",
+        "FINANCIALS", "REAL ESTATE", "METALS", "ENERGY", "OIL & GAS", "Tech",
         "Healthcare", "Consumer Discretionary", "Communication Services", "Industrials", "Energy",
         "Materials", "Agriculture", "Manufacturing", "Consumer Staples"
     ],

@@ -1,4 +1,4 @@
-import psycopg2, os
+import psycopg2, os, json
 from psycopg2.extras import RealDictCursor
 from contextlib import contextmanager
 from typing import Dict
@@ -139,5 +139,89 @@ def insert_unique_stories(story: Dict):
             ),
         )
         
+        conn.commit()
+        cur.close()
+
+
+# ==========================================
+# NER Agent Utilities
+# ==========================================
+
+def fetch_unique_stories(limit: int = None):
+    """Fetch deduplicated stories from unique_news"""
+    with get_db_connection() as conn:
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        sql = "SELECT id, article_ids, article_title, combined_text, num_articles FROM unique_news ORDER BY id;"
+        if limit:
+            sql += f" LIMIT {limit}"
+        cur.execute(sql)
+        rows = cur.fetchall()
+        cur.close()
+    return rows
+
+def create_news_entities_table():
+    """Creates table to store extracted entities."""
+    with get_db_connection() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            """ 
+            CREATE TABLE IF NOT EXISTS news_entities (
+            id SERIAL PRIMARY KEY,
+            story_id INT,
+            article_ids TEXT,
+            article_title TEXT,
+            companies TEXT,
+            sectors TEXT,
+            people TEXT,
+            indices TEXT,
+            regulators TEXT,
+            policies TEXT,
+            products TEXT,
+            locations TEXT,
+            kpis TEXT,
+            financial_terms TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            """
+        )
+
+        conn.commit()
+        cur.close()
+
+def insert_entities(entity_row: dict):
+    """
+    entity_row:
+    {
+      'story_id': int,
+      'article_ids': str (or list),
+      'article_title': str,
+      'companies': list,
+      'sectors': list,
+      ...
+    }
+    """
+    with get_db_connection() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            """
+            INSERT INTO news_entities 
+            (story_id, article_ids, article_title, companies, sectors, people, indices, regulators, policies, products, locations, kpis, financial_terms)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                entity_row.get("story_id"),
+                json.dumps(entity_row.get("article_ids")),
+                entity_row.get("article_title"),
+                json.dumps(entity_row.get("companies", [])),
+                json.dumps(entity_row.get("sectors", [])),
+                json.dumps(entity_row.get("people", [])),
+                json.dumps(entity_row.get("indices", [])),
+                json.dumps(entity_row.get("regulators", [])),
+                json.dumps(entity_row.get("policies", [])),
+                json.dumps(entity_row.get("products", [])),
+                json.dumps(entity_row.get("locations", [])),
+                json.dumps(entity_row.get("kpis", [])),
+                json.dumps(entity_row.get("financial_terms", [])),
+            )
+        )
         conn.commit()
         cur.close()
