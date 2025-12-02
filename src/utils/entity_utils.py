@@ -2,12 +2,13 @@ import re, json, numpy as np
 from pathlib import Path
 from typing import List, Dict
 
-gazetteer_path = Path("src/utils/fin_gazetteers.json")
+gazetteer_path = Path("assets/fin_gazetteers.json")
 
 with open(gazetteer_path, "r") as f:
     GAZ = json.load(f)
 
-# print(G)
+print(GAZ)
+print("Works fine!!")
 
 INDICES = [x.lower() for x in GAZ["indices"]]
 SECTORS = [x.lower() for x in GAZ["sectors"]]
