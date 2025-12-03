@@ -225,3 +225,19 @@ def insert_entities(entity_row: dict):
         )
         conn.commit()
         cur.close()
+
+# ==========================================
+# Impact Mapping Agent Utilities
+# ==========================================
+
+def fetch_entities(limit: int = None):
+    """Fetch extracted entities from the database"""
+    with get_db_connection() as conn:
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        sql = "SELECT * FROM news_entities ORDER BY id;"
+        if limit:
+            sql += f" LIMIT {limit}"
+        cur.execute(sql)
+        row_entities = cur.fetchall()
+        cur.close()
+    return row_entities
