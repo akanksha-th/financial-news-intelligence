@@ -1,0 +1,103 @@
+{
+  "repo rate": {
+    "sectors": ["Banking", "Financial Services", "NBFC", "Housing Finance"],
+    "confidence": 0.65,
+    "reason": "Changes in repo rate directly impact lending/borrowing rates, loan demand, and cost of funds."
+  },
+
+  "reverse repo rate": {
+    "sectors": ["Banking", "Financial Services"],
+    "confidence": 0.6,
+    "reason": "Banks' interest on deposits parked with RBI changes; affects liquidity."
+  },
+
+  "cash reserve ratio": {
+    "sectors": ["Banking"],
+    "confidence": 0.7,
+    "reason": "CRR changes instantly affect liquidity in banking system."
+  },
+
+  "statutory liquidity ratio": {
+    "sectors": ["Banking", "Government Bonds"],
+    "confidence": 0.6,
+    "reason": "SLR affects bank leverage and investment in government securities."
+  },
+
+  "inflation": {
+    "sectors": ["Consumer Staples", "Consumer Discretionary", "FMCG", "Retail", "Automobile"],
+    "confidence": 0.5,
+    "reason": "Inflation affects consumer demand and input costs across sectors."
+  },
+
+  "gst": {
+    "sectors": ["FMCG", "Automobile", "Retail", "Logistics"],
+    "confidence": 0.55,
+    "reason": "GST changes alter consumption patterns and supply chain costs."
+  },
+
+  "import duty": {
+    "sectors": ["Metals", "Automobile", "Electronics", "Oil & Gas"],
+    "confidence": 0.6,
+    "reason": "Import duties affect raw material costs and product pricing."
+  },
+
+  "export duty": {
+    "sectors": ["Metals", "Chemicals", "Agriculture", "Textiles"],
+    "confidence": 0.55,
+    "reason": "Export duties affect outbound trade competitiveness."
+  },
+
+  "fiscal deficit": {
+    "sectors": ["Government Bonds", "Financial Services"],
+    "confidence": 0.45,
+    "reason": "High fiscal deficit increases borrowing and impacts yields."
+  },
+
+  "income tax": {
+    "sectors": ["Consumer Discretionary", "Retail", "FMCG"],
+    "confidence": 0.5,
+    "reason": "Changes in personal income tax alter disposable income."
+  },
+
+  "corporate tax": {
+    "sectors": ["All"],
+    "confidence": 0.55,
+    "reason": "Affects company profitability across sectors."
+  },
+
+  "monetary policy": {
+    "sectors": ["Banking", "Financial Services", "NBFC"],
+    "confidence": 0.6,
+    "reason": "Monetary policy directly affects cost of borrowing."
+  },
+
+  "credit growth": {
+    "sectors": ["Banking", "NBFC", "Housing Finance"],
+    "confidence": 0.7,
+    "reason": "Credit demand affects lenders' fundamentals."
+  },
+
+  "oil prices": {
+    "sectors": ["Oil & Gas", "Aviation", "Logistics", "Chemical"],
+    "confidence": 0.6,
+    "reason": "Oil is a major input cost for multiple industries."
+  },
+
+  "interest rate hike": {
+    "sectors": ["Banking", "Financial Services", "NBFC", "Real Estate"],
+    "confidence": 0.65,
+    "reason": "Rate hikes increase loan EMIs and borrowing costs."
+  },
+
+  "interest rate cut": {
+    "sectors": ["Banking", "Financial Services", "Automobile", "Real Estate"],
+    "confidence": 0.65,
+    "reason": "Cuts boost borrowing and consumption."
+  },
+
+  "inflation targeting": {
+    "sectors": ["Financial Services", "Consumer Staples"],
+    "confidence": 0.4,
+    "reason": "Influences monetary policy direction."
+  }
+}

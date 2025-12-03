@@ -1,0 +1,22 @@
+{
+  "rbi": {
+    "sectors": ["Banking", "Financial Services", "NBFC", "Housing Finance"],
+    "confidence": 0.6
+  },
+  "sebi": {
+    "sectors": ["Capital Markets", "Financial Services", "Asset Management", "Brokerage"],
+    "confidence": 0.6
+  },
+  "trai": {
+    "sectors": ["Telecom", "Communication Services", "Internet Services"],
+    "confidence": 0.6
+  },
+  "irdai": {
+    "sectors": ["Insurance", "Life Insurance", "Health Insurance"],
+    "confidence": 0.6
+  },
+  "mnre": {
+    "sectors": ["Renewable Energy", "Utilities", "Power"],
+    "confidence": 0.5
+  }
+}
