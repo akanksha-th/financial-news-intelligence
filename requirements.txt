@@ -8,4 +8,8 @@ psycopg2
 dotenv
 torch
 transformers
-spacy
+rapidfuzz
+openai
+flask
+scikit-learn
+psycopg2-binary
