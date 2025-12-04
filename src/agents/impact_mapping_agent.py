@@ -96,12 +96,11 @@ if __name__ == "__main__":
         "computed_impacts": [],
         "saved_count": 0
     })
-
-    # Save graph diagram
+    
     img_bytes = impact_app.get_graph().draw_mermaid_png()
     os.makedirs("graph_images", exist_ok=True)
     outpath = "graph_images/impact_mapping_graph.png"
     with open(outpath, "wb") as f:
         f.write(img_bytes)
 
-    print(f"[Impact Agent] Graph saved to {outpath}")
+    print(f"Graph saved to {outpath}")
