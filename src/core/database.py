@@ -233,11 +233,77 @@ def insert_entities(entity_row: dict):
 def fetch_entities(limit: int = None):
     """Fetch extracted entities from the database"""
     with get_db_connection() as conn:
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        sql = "SELECT * FROM news_entities ORDER BY id;"
-        if limit:
-            sql += f" LIMIT {limit}"
-        cur.execute(sql)
-        row_entities = cur.fetchall()
-        cur.close()
-    return row_entities
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT ne.story_id,
+                   ne.companies,
+                   ne.sectors,
+                   ne.regulators,
+                   ne.policies,
+                   ne.indices,
+                   ne.kpis
+            FROM news_entities ne
+            LEFT JOIN story_impacts si
+                ON ne.story_id = si.story_id
+            WHERE si.story_id IS NULL;
+        """)
+
+        rows = cur.fetchall()
+
+        results = []
+        for r in rows:
+            story_id = r[0]
+
+            def parse(x):
+                if not x:
+                    return []
+                try:
+                    return json.loads(x)
+                except:
+                    return []
+
+            results.append({
+                "story_id": story_id,
+                "entities": {
+                    "companies": parse(r[1]),
+                    "sectors": parse(r[2]),
+                    "regulators": parse(r[3]),
+                    "policies": parse(r[4]),
+                    "indices": parse(r[5]),
+                    "kpis": parse(r[6]),
+                }
+            })
+        return results
+
+
+def create_story_impacts_table():
+    """Create the story_impacts table if not exists."""
+    with get_db_connection() as conn:
+        cur = conn.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS story_impacts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                story_id INTEGER NOT NULL,
+                impacted_assets TEXT NOT NULL,
+                summary TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        """)
+        conn.commit()
+
+import json
+
+def insert_story_impacts(story_id: int, impacts: list, summary: str = None):
+    """
+    Insert computed impact mapping results into story_impacts table.
+    """
+    with get_db_connection() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            """
+            INSERT INTO story_impacts (story_id, impacted_assets, summary)
+            VALUES (?, ?, ?)
+            """,
+            (story_id, json.dumps(impacts), summary)
+        )
+        conn.commit()
