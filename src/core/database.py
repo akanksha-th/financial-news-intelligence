@@ -1,7 +1,7 @@
 import psycopg2, os, json
 from psycopg2.extras import RealDictCursor
 from contextlib import contextmanager
-from typing import Dict
+from typing import Dict, List, Any, Optional
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -311,3 +311,144 @@ def fetch_unprocessed_entities():
             print("ERROR parsing row:", r, e)
 
     return output
+
+
+try:
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+    _HAS_PG = True
+except Exception:
+    psycopg2 = None
+    RealDictCursor = None
+    _HAS_PG = False
+
+# ---------------------------------------------------------------------
+# Helper: fetch stories by a list of ids, preserving order of ids
+# ---------------------------------------------------------------------
+def fetch_stories_by_ids(ids: List[int]) -> List[Dict[str, Any]]:
+    """
+    Returns list of story dicts in the same order as ids.
+    Works with Postgres (RealDictCursor) or sqlite3 fallback.
+    """
+    if not ids:
+        return []
+
+    ids_tuple = tuple(ids)
+    # Use parameterized query for safety
+    if _HAS_PG:
+        sql = "SELECT * FROM unique_stories WHERE id = ANY(%s);"
+        # Using ANY preserves no order - we'll reorder later
+        with get_db_connection() as conn:
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            cur.execute(sql, (ids_tuple,))
+            rows = cur.fetchall()
+            cur.close()
+        # reorder rows to match ids
+        id_to_row = {r["id"]: r for r in rows}
+        ordered = [id_to_row.get(i) for i in ids if id_to_row.get(i) is not None]
+        return ordered
+    else:
+        # sqlite fallback: use ? placeholders
+        placeholders = ",".join("?" for _ in ids)
+        sql = f"SELECT * FROM unique_stories WHERE id IN ({placeholders});"
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute(sql, ids)
+        cols = [c[0] for c in cur.description]
+        rows = [dict(zip(cols, r)) for r in cur.fetchall()]
+        conn.close()
+        id_to_row = {r["id"]: r for r in rows}
+        ordered = [id_to_row.get(i) for i in ids if id_to_row.get(i) is not None]
+        return ordered
+
+# ---------------------------------------------------------------------
+# Helper: fetch stories matching a sector name
+# ---------------------------------------------------------------------
+def fetch_stories_by_sector(sector_name: str, limit: Optional[int] = 100) -> List[Dict[str, Any]]:
+    """
+    Try several strategies:
+      - If sectors stored as JSON/JSONB or text array (Postgres), use containment
+      - Fallback to ILIKE '%sector_name%' on the sectors text column or combined_text
+    Adjust 'unique_stories' to your table name if needed.
+    """
+    if not sector_name:
+        return []
+
+    sector_norm = sector_name.strip().lower()
+
+    if _HAS_PG:
+        with get_db_connection() as conn:
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            # Try jsonb containment (works if sectors is jsonb array)
+            try:
+                sql = """
+                SELECT * FROM unique_stories
+                WHERE (sectors::text ILIKE %s OR sectors::jsonb ? %s)
+                ORDER BY published_at DESC
+                LIMIT %s;
+                """
+                cur.execute(sql, (f"%{sector_norm}%", sector_norm, limit))
+                rows = cur.fetchall()
+                cur.close()
+                return rows
+            except Exception:
+                # fallback - text search
+                sql2 = """
+                SELECT * FROM unique_stories
+                WHERE sectors ILIKE %s OR combined_text ILIKE %s
+                ORDER BY published_at DESC
+                LIMIT %s;
+                """
+                cur.execute(sql2, (f"%{sector_norm}%", f"%{sector_norm}%", limit))
+                rows = cur.fetchall()
+                cur.close()
+                return rows
+    else:
+        # sqlite fallback: sectors column may be a JSON string or CSV-ish
+        conn = get_db_connection()
+        cur = conn.cursor()
+        pattern = f"%{sector_norm}%"
+        sql = """
+            SELECT * FROM unique_stories
+            WHERE lower(sectors) LIKE ? OR lower(combined_text) LIKE ?
+            ORDER BY published_at DESC
+            LIMIT ?
+        """
+        cur.execute(sql, (pattern, pattern, limit))
+        cols = [c[0] for c in cur.description]
+        rows = [dict(zip(cols, r)) for r in cur.fetchall()]
+        conn.close()
+        return rows
+
+# ---------------------------------------------------------------------
+# Helper: fetch all unique stories (for building the index)
+# ---------------------------------------------------------------------
+def fetch_all_unique_stories(limit: Optional[int] = None) -> List[Dict[str, Any]]:
+    """
+    Return all unique stories used for embedding indexing.
+    """
+    if _HAS_PG:
+        with get_db_connection() as conn:
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            sql = "SELECT * FROM unique_stories ORDER BY published_at DESC"
+            if limit:
+                sql += f" LIMIT %s"
+                cur.execute(sql, (limit,))
+            else:
+                cur.execute(sql)
+            rows = cur.fetchall()
+            cur.close()
+            return rows
+    else:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        sql = "SELECT * FROM unique_stories ORDER BY published_at DESC"
+        if limit:
+            sql += f" LIMIT ?"
+            cur.execute(sql, (limit,))
+        else:
+            cur.execute(sql)
+        cols = [c[0] for c in cur.description]
+        rows = [dict(zip(cols, r)) for r in cur.fetchall()]
+        conn.close()
+        return rows
