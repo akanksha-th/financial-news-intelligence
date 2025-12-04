@@ -53,6 +53,7 @@ data/**/*.db*
 # MODELS
 # -----------------------------
 models/
+src/api/*
 
 # -----------------------------
 # VECTOR STORES / RAG INDEXES
