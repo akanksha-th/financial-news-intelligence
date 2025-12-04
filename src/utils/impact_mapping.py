@@ -95,44 +95,56 @@ def compute_impacts_for_entities(entities: Dict[str, Any],
     index_to_symbols = index_to_symbols or {}
 
     impacts_flags = defaultdict(lambda: defaultdict(bool))
+    summary_parts = []
 
-    # 1) Direct companies
+    # ------------------------------------------------------
+    # 1) DIRECT COMPANIES
     for comp in entities.get("companies", []) or []:
         sym = None
         if comp in company_to_symbol:
             sym = company_to_symbol[comp]
-            impacts_flags[sym]["gazetteer"] = True
+            impacts_flags[sym]["direct"] = True
+            summary_parts.append(f"{comp} directly mentioned.")
         else:
             sym = fuzzy_match_company(comp, company_to_symbol)
             if sym:
                 impacts_flags[sym]["gazetteer"] = True
+                summary_parts.append(f"{comp} matched via fuzzy lookup → {sym}.")
         if sym:
             impacts_flags[sym]["direct"] = True
 
-    # 2) Sector mentions
-    for sector in entities.get("sectors", []) or []:
-        key = normalize_name(sector)
+    # ------------------------------------------------------
+    # 2) SECTOR IMPACTS
+    for sec in entities.get("sectors", []) or []:
+        key = normalize_name(sec)
         syms = sector_to_symbols.get(key, [])
         for s in syms:
             impacts_flags[s]["sector"] = True
+        if syms:
+            summary_parts.append(f"Sector {sec} impacted ({len(syms)} stocks).")
 
-    # 3) Regulator Mention
+    # ------------------------------------------------------
+    # 3) REGULATOR IMPACTS
     for reg in entities.get("regulators", []) or []:
         rkey = normalize_name(reg)
-
-        rule = regulator_rules.get(rkey) or regulator_rules.get(rkey.upper()) or regulator_rules.get(rkey.lower())
+        rule = regulator_rules.get(rkey) or regulator_rules.get(rkey.lower()) or regulator_rules.get(rkey.upper())
         if rule:
-            for sec in (rule.get("sectors") or []):
+            sec_list = rule.get("sectors", [])
+            conf = rule.get("confidence", SCORES["regulatory"])
+            for sec in sec_list:
                 syms = sector_to_symbols.get(sec.lower(), [])
                 for s in syms:
                     impacts_flags[s]["regulatory"] = True
+            summary_parts.append(f"Regulator {reg} triggers impact on sectors {sec_list}.")
 
-    # 4) Policy mentions
-    for policy in entities.get("policies", []) or []:
-        pkey = normalize_name(policy)
+    # ------------------------------------------------------
+    # 4) POLICY IMPACTS
+    for pol in entities.get("policies", []) or []:
+        pkey = normalize_name(pol)
         rule = policy_rules.get(pkey) or policy_rules.get(pkey.lower())
         if rule:
-            for sec in (rule.get("sectors") or []):
+            sectors = rule.get("sectors", [])
+            for sec in sectors:
                 if sec == "All":
                     for s in symbol_to_sector.keys():
                         impacts_flags[s]["policy"] = True
@@ -140,43 +152,34 @@ def compute_impacts_for_entities(entities: Dict[str, Any],
                     syms = sector_to_symbols.get(sec.lower(), [])
                     for s in syms:
                         impacts_flags[s]["policy"] = True
+            summary_parts.append(f"Policy {pol} impacts sectors {sectors}.")
 
-    # 5) Index mentions
     for idx in entities.get("indices", []) or []:
         idx_key = normalize_name(idx)
         syms = index_to_symbols.get(idx_key, [])
         for s in syms:
             impacts_flags[s]["index"] = True
-
-    # Build final list: compute confidence by priority
+        if syms:
+            summary_parts.append(f"Index {idx} impacts {len(syms)} stocks.")
+            
     results = []
     for sym, flags in impacts_flags.items():
-        primary = None
-        for t in PRIORITY_ORDER:
-            if flags.get(t):
-                primary = t
-                break
-        if primary is None:
-            primary = "semantic"
-        conf = float(SCORES.get(primary, 0.4))
+        primary = next((t for t in PRIORITY_ORDER if flags.get(t)), "semantic")
+        score = SCORES.get(primary, 0.4)
+
         results.append({
             "symbol": sym,
-            "confidence": round(conf, 3),
+            "confidence": round(score, 3),
             "type": primary,
             "flags": [k for k, v in flags.items() if v]
         })
 
     if not results:
-        for policy in entities.get("policies", []) or []:
-            rule = policy_rules.get(normalize_name(policy))
-            if rule:
-                for sec in (rule.get("sectors") or []):
-                    syms = sector_to_symbols.get(sec.lower(), [])[:5]
-                    for s in syms:
-                        results.append({"symbol": s, "confidence": round(SCORES["policy"], 3), "type": "policy", "flags": ["policy"]})
+        summary = "No significant impact detected."
+        return [], summary
 
-    results = sorted(results, key=lambda x: -x["confidence"])
-    return results
+    summary = " ".join(summary_parts) if summary_parts else "No significant impact detected."
+    return results, summary
 
 
 def format_impacts_list(impacts: List[Dict[str, Any]], max_items: int = 20) -> List[Dict]:

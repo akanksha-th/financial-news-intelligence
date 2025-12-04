@@ -7,8 +7,8 @@ gazetteer_path = Path("assets/fin_gazetteers.json")
 with open(gazetteer_path, "r") as f:
     GAZ = json.load(f)
 
-print(GAZ)
-print("Works fine!!")
+# print(GAZ)
+# print("Works fine!!")
 
 INDICES = [x.lower() for x in GAZ["indices"]]
 SECTORS = [x.lower() for x in GAZ["sectors"]]

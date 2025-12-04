@@ -230,59 +230,13 @@ def insert_entities(entity_row: dict):
 # Impact Mapping Agent Utilities
 # ==========================================
 
-def fetch_entities(limit: int = None):
-    """Fetch extracted entities from the database"""
-    with get_db_connection() as conn:
-        cur = conn.cursor()
-        cur.execute("""
-            SELECT ne.story_id,
-                   ne.companies,
-                   ne.sectors,
-                   ne.regulators,
-                   ne.policies,
-                   ne.indices,
-                   ne.kpis
-            FROM news_entities ne
-            LEFT JOIN story_impacts si
-                ON ne.story_id = si.story_id
-            WHERE si.story_id IS NULL;
-        """)
-
-        rows = cur.fetchall()
-
-        results = []
-        for r in rows:
-            story_id = r[0]
-
-            def parse(x):
-                if not x:
-                    return []
-                try:
-                    return json.loads(x)
-                except:
-                    return []
-
-            results.append({
-                "story_id": story_id,
-                "entities": {
-                    "companies": parse(r[1]),
-                    "sectors": parse(r[2]),
-                    "regulators": parse(r[3]),
-                    "policies": parse(r[4]),
-                    "indices": parse(r[5]),
-                    "kpis": parse(r[6]),
-                }
-            })
-        return results
-
-
 def create_story_impacts_table():
     """Create the story_impacts table if not exists."""
     with get_db_connection() as conn:
         cur = conn.cursor()
         cur.execute("""
             CREATE TABLE IF NOT EXISTS story_impacts (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 story_id INTEGER NOT NULL,
                 impacted_assets TEXT NOT NULL,
                 summary TEXT,
@@ -302,8 +256,58 @@ def insert_story_impacts(story_id: int, impacts: list, summary: str = None):
         cur.execute(
             """
             INSERT INTO story_impacts (story_id, impacted_assets, summary)
-            VALUES (?, ?, ?)
+            VALUES (%s, %s, %s);
             """,
             (story_id, json.dumps(impacts), summary)
         )
         conn.commit()
+
+def fetch_unprocessed_entities():
+    """
+    Fetch stories from news_entities that do NOT exist in story_impacts.
+    Convert DB rows into clean dictionaries for the agent.
+    """
+    with get_db_connection() as conn:
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("""
+            SELECT ne.*
+            FROM news_entities ne
+            LEFT JOIN story_impacts si
+                ON ne.id = si.story_id
+            WHERE si.story_id IS NULL;
+        """)
+        rows = cur.fetchall()
+
+    # Normalize output for agent
+    output = []
+    for r in rows:
+        try:
+
+            def parse_json(x):
+                if not x or x == "null":
+                    return []
+                try:
+                    return json.loads(x)
+                except:
+                    return []
+
+            output.append({
+                "story_id": r["id"],   # THIS is the link
+                "entities": {
+                    "companies": parse_json(r["companies"]),
+                    "sectors": parse_json(r["sectors"]),
+                    "people": parse_json(r["people"]),
+                    "indices": parse_json(r["indices"]),
+                    "regulators": parse_json(r["regulators"]),
+                    "policies": parse_json(r["policies"]),
+                    "products": parse_json(r["products"]),
+                    "locations": parse_json(r["locations"]),
+                    "kpis": parse_json(r["kpis"]),
+                    "financial_terms": parse_json(r["financial_terms"]),
+                }
+            })
+
+        except Exception as e:
+            print("ERROR parsing row:", r, e)
+
+    return output

@@ -56,6 +56,48 @@ def run_ner_on_stories(state: EntityExtractionAgent) -> EntityExtractionAgent:
     print(f"[NER Agent] Completed NER on {len(results)} stories")
     return state
 
+# -----Helper functions-----
+def _clean_subword_tokens(token_str: str) -> str:
+    """
+    If NER left merged strings like '##E' or 'Hyun ##dai' this attempts to reconstruct.
+    Input may already be a full string; if it's tokenized into wordpiece artifacts,
+    this tries to remove '##' fragments sensibly.
+    """
+    if not token_str:
+        return token_str
+    # If token contains '##' pieces or multiple spaces, fix naively:
+    # e.g. "Hyun ##dai Motor" -> "Hyundai Motor"
+    parts = token_str.split()
+    out_parts = []
+    for p in parts:
+        if p.startswith("##"):
+            if out_parts:
+                out_parts[-1] = out_parts[-1] + p[2:]
+            else:
+                # leading ##, just append cleaned
+                out_parts.append(p[2:])
+        else:
+            out_parts.append(p)
+    return " ".join(out_parts).strip()
+
+def _normalize_entity_list(lst):
+    """Normalize list of strings: strip, lower optionally, remove wordpiece artifacts and duplicates"""
+    seen = set()
+    out = []
+    for v in (lst or []):
+        if not isinstance(v, str):
+            continue
+        cleaned = _clean_subword_tokens(v).strip()
+        if not cleaned:
+            continue
+        # keep original casing for gazetteer matching, but strip duplicates using lower-case
+        key = cleaned.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(cleaned)
+    return out
+
 def apply_rules_and_merge(state: EntityExtractionAgent) -> EntityExtractionAgent:
     extended_ents = []
     for item in state["ner_results"]:
@@ -64,6 +106,18 @@ def apply_rules_and_merge(state: EntityExtractionAgent) -> EntityExtractionAgent
 
         rules = match_rules(text)
         cleaned = postprocess_entities(ner_out, rules)
+        if not isinstance(cleaned, dict):
+            cleaned = {}
+
+        # inject story metadata so insert_entities gets story_id, article_ids and article_title
+        cleaned["story_id"] = item.get("story_id")
+        cleaned["article_ids"] = item.get("article_ids")
+        cleaned["article_title"] = item.get("title")
+
+        # Normalize lists and clean tokens (remove '##' etc)
+        for k in ["companies", "sectors", "people", "indices", "regulators", "policies", "products", "locations", "kpis", "financial_terms"]:
+            cleaned[k] = _normalize_entity_list(cleaned.get(k, []))
+
         extended_ents.append(cleaned)
 
     state["extended_ner"] = extended_ents
@@ -76,7 +130,23 @@ def save_entities(state: EntityExtractionAgent) -> EntityExtractionAgent:
     count = 0
     for row in state["extended_ner"]:
         try:
-            insert_entities(row)
+            # defensive: ensure keys exist and are lists/strings as expected by insert_entities
+            row_payload = {
+                "story_id": row.get("story_id"),
+                "article_ids": row.get("article_ids"),
+                "article_title": row.get("article_title"),
+                "companies": row.get("companies", []),
+                "sectors": row.get("sectors", []),
+                "people": row.get("people", []),
+                "indices": row.get("indices", []),
+                "regulators": row.get("regulators", []),
+                "policies": row.get("policies", []),
+                "products": row.get("products", []),
+                "locations": row.get("locations", []),
+                "kpis": row.get("kpis", []),
+                "financial_terms": row.get("financial_terms", [])
+            }
+            insert_entities(row_payload)
             count += 1
         except Exception as e:
             print(f"[Ingestion Agent] Failed to insert: {e}")
