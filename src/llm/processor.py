@@ -20,8 +20,14 @@ class QueryProcessor:
         print("query rewritten\n")
 
         entities = postprocess_entities([], match_rules(rewritten))
-        structured["entities"] = entities
-        print(entities)
+        fin_entities = {}
+        for key in entities.keys():
+            if entities[key] == []:
+                continue
+            else:
+                fin_entities[key] = entities[key]
+        structured["entities"] = fin_entities
+        print(fin_entities)
         print("Entities extracted\n")
 
         def classify_query_type(entities: dict) -> str:
@@ -59,5 +65,6 @@ class QueryProcessor:
 if __name__ == "__main__":
     model_path = "C:/Users/aktkr/financial-news-intelligence/models"
     pr = QueryProcessor(model_path)
-    query = "RBI raised repo rate, who will benefit?"
+    # query = "RBI raised repo rate, who will benefit?"
+    query = "HDFC Bank news for future"
     print(pr.process(query))
