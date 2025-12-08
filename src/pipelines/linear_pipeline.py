@@ -21,9 +21,9 @@ def retry(times=3):
                 except Exception as e:
                     print(f"[WARN] {fn.__name__} failed (attempt {attempt+1}: {e})")
                     time.sleep(2)
-                raise RuntimeError(f"Node {fn.__name__} failed after {times} retries")
-            return wrapper
-        return decorator
+            raise RuntimeError(f"Node {fn.__name__} failed after {times} retries")
+        return wrapper
+    return decorator
 
 @retry(times=3)
 def run_ingestion(state: PipelineState) -> PipelineState:
