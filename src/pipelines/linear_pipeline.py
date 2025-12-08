@@ -5,13 +5,27 @@ from src.agents import (
 from langgraph.graph import StateGraph, END
 from typing import TypedDict, Dict, Any, List
 from IPython.display import Image, display
-import os
+import os, time
 
 
 class PipelineState(TypedDict):
     rss_feeds: List
     info: Dict[str, Any]
 
+def retry(times=3):
+    def decorator(fn):
+        def wrapper(state):
+            for attempt in range(times):
+                try:
+                    return fn(state)
+                except Exception as e:
+                    print(f"[WARN] {fn.__name__} failed (attempt {attempt+1}: {e})")
+                    time.sleep(2)
+                raise RuntimeError(f"Node {fn.__name__} failed after {times} retries")
+            return wrapper
+        return decorator
+
+@retry(times=3)
 def run_ingestion(state: PipelineState) -> PipelineState:
     """Runs ingestion agent"""
     ingestion_app = build_ingestion_graph()
@@ -24,6 +38,7 @@ def run_ingestion(state: PipelineState) -> PipelineState:
     state["info"]["ingestion"] = result
     return state
 
+@retry(times=3)
 def run_deduplication(state: PipelineState) -> PipelineState:
     """Runs deduplication agent"""
     dedup_app = build_dedup_graph()
@@ -36,6 +51,7 @@ def run_deduplication(state: PipelineState) -> PipelineState:
     state["info"]["dedup"] = result
     return state
 
+@retry(times=3)
 def run_entity_extraction(state: PipelineState) -> PipelineState:
     """Run entity extraction agent"""
     ner_app = build_entity_graph()
@@ -48,6 +64,7 @@ def run_entity_extraction(state: PipelineState) -> PipelineState:
     state["info"]["ner"] = result
     return state
 
+@retry(times=3)
 def run_impact_mapping(state: PipelineState) -> PipelineState:
     """Run impact mapping agent"""
     impact_app = build_impact_mapping_graph()
@@ -71,7 +88,6 @@ def build_end_to_end_pipeline():
     graph.add_edge("ingestion", "deduplication")
     graph.add_edge("deduplication", "entity_extraction")
     graph.add_edge("entity_extraction", "impact_mapping")
-    graph.add_edge("entity_extraction", "empact_mapping")
     graph.add_edge("impact_mapping", END)
 
     return graph.compile()
@@ -80,6 +96,15 @@ if __name__ == "__main__":
     # run on CLI using "python -m src.pipelines.linear_pipeline"
 
     pipeline = build_end_to_end_pipeline()
+
+    img_bytes = pipeline.get_graph().draw_mermaid_png()
+    os.makedirs("graph_images", exist_ok=True)
+    output_path = "graph_images/linear_pipeline_graph.png"
+
+    with open(output_path, 'wb') as f:
+        f.write(img_bytes)
+    print(f"Graph saved successfully at {output_path}")
+
     result = pipeline.invoke({
         "rss_feeds": [
             "https://www.marketbeat.com/feed/",
@@ -91,11 +116,3 @@ if __name__ == "__main__":
     })
 
     print("Pipeline Completed")
-
-    img_bytes = pipeline.get_graph().draw_mermaid_png()
-    os.makedirs("graph_images")
-    output_path = "graph_images/pipeline_graph.png"
-
-    with open(output_path, 'wb') as f:
-        f.write(img_bytes)
-    print(f"Graph saved successfully at {output_path}")
