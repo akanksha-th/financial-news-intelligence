@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="'en">
+    <head>
+        <title>{{ title or "News Intelligence" }}</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    </head>
+    <body>
+        
+        <nav>
+            <a href="/pipeline">Pipeline</a>
+            <a href="/query">Query</a>
+        </nav>
+
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+
+    </body>
+</html>

@@ -1,0 +1,15 @@
+{% extends base.html %}
+{% block content %}
+
+<h1>Pipeline Control</h1>
+
+<form action="/pipeline/run" method="POST">
+    <button type="submit">Run Pipeline</button>
+</form>
+
+<div>
+    <h3>Status</h3>
+    <pre id="status-box">{{ status }}</pre>
+</div>
+
+{% endblock %}

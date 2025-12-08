@@ -1,0 +1,17 @@
+{% extends base.html %}
+{% block content %}
+
+<h1>Query Insights</h1>
+
+<form method="GET" action="/query/search">
+    <input name="q" placeholder="Search entities or stories">
+    <button type="submit">Search</button>
+</form>
+
+<div id="results">
+    {% if results %}
+    <pre>{{ results }}</pre>
+    {% endif %}
+</div>
+
+{% endblock %}
