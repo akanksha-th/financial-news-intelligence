@@ -94,6 +94,7 @@ def save_stories(state: DeDupState) -> DeDupState:
 
     state["unique_stories"] = stories
     print(f"[DeDup Agent] Saved {len(stories)} unique stories.")
+    return state
 
 def build_dedup_graph():
     graph = StateGraph(DeDupState)
