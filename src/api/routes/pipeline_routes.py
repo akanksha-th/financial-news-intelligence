@@ -53,7 +53,10 @@ def run_pipeline_stream():
 
         yield "event: message\ndata: Pipeline completed successfully.\n\n"
         yield f"event: done\ndata: {final_state}\n\n"
+    
     except Exception as e:
+        print("Pipeline SSE ERROR:", e)
+        
         PIPELINE_STATE["last_run_time"] = datetime.utcnow().isoformat()
         PIPELINE_STATE["last_status"] = "error"
         PIPELINE_STATE["last_error"] = str(e)

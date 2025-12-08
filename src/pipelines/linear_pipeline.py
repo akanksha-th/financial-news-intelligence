@@ -56,7 +56,7 @@ def run_entity_extraction(state: PipelineState) -> PipelineState:
     """Run entity extraction agent"""
     ner_app = build_entity_graph()
     result = ner_app.invoke({
-        "stories": [],
+        "stories": state["info"]["dedup"]["unique_stories"],
         "ner_result": [],
         "extended_ner": [],
         "saved_count": 0

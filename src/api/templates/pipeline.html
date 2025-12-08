@@ -17,7 +17,7 @@
         const logBox = document.getElementById("log-box")
 
         // create SSE connection
-        const source = new EventSource("/pipeline/run/stream");
+        const source = new EventSource("/pipeline");
         
         source.onmessage = function(event) {
             logBox.textContent += event.data + "\n";

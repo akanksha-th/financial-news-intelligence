@@ -20,8 +20,9 @@ class DeDupState(TypedDict):
 
 def load_articles(state: DeDupState) -> DeDupState:
     """Fetches raw articles from the database"""
-    rows = fetch_raw_articles()
-
+    # rows = fetch_raw_articles()
+    rows = state["raw_articles"]
+    
     state["raw_articles"] = rows
     print(f"[DeDup Agent] Loaded {len(rows)} raw articles.")
 

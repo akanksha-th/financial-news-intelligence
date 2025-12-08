@@ -18,7 +18,8 @@ class ImpactMappingAgent(TypedDict):
 def load_entities(state: ImpactMappingAgent) -> ImpactMappingAgent:
     """Fetch entity rows to be impact-mapped"""
     create_story_impacts_table()
-    items = fetch_unprocessed_entities()
+    # items = fetch_unprocessed_entities()
+    items = state["entities"]
     state["entities"] = items
     print(f"[Impact Mapping Agent] Loaded {len(items)} stories for impact mapping.")
     return state
