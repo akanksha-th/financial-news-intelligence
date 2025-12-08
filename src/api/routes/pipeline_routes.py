@@ -61,6 +61,6 @@ def run_pipeline_stream():
         yield f"event: error\ndata: Pipeline error: {e}\n\n"
 
 
-@pipeline_bp.route("/run/stream", methods=["GET"])
+@pipeline_bp.route("/pipeline/run/stream", methods=["GET"])
 def pipeline_stream():
     return Response(stream_with_context(run_pipeline_stream()), mimetype="text/event-stream")

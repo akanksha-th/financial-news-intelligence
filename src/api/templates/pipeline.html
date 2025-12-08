@@ -3,13 +3,37 @@
 
 <h1>Pipeline Control</h1>
 
-<form action="/run/stream" method="GET">
-    <button type="submit">Run Pipeline</button>
-</form>
+<button onclick="runPipeline()">Run Pipeline</button>
 
-<div>
-    <h3>Status</h3>
-    <pre id="status-box">{{ status }}</pre>
+<div style="margin-top:20px;">
+    <h3>Live Logs</h3>
+    <pre id="log-box" style="background:#111; color:#0f0; padding:10px; height:300px; overflow-y:auto;">
+--- Pipeline output will appear here ---
+    </pre>
 </div>
+
+<script>
+    function runPipeline() {
+        const logBox = document.getElementById("log-box")
+
+        // create SSE connection
+        const source = new EventSource("/pipeline/run/stream");
+        
+        source.onmessage = function(event) {
+            logBox.textContent += event.data + "\n";
+            logBox.scrollTop = logBox.scrollHeight;
+        };
+        
+        source.addEventListener("error", function(event) {
+            logBox.textContent += "\n--- ERROR: Check backend logs ---\n";
+            source.close();
+        });
+        
+        souce.addEventListener("done", function(event) {
+            logBox.textContent += "\n--- PIPELINE FINISHED ---\n";
+            source.close();
+        });
+    }
+</script>
 
 {% endblock %}
