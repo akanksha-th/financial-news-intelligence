@@ -43,7 +43,7 @@ def run_deduplication(state: PipelineState) -> PipelineState:
     """Runs deduplication agent"""
     dedup_app = build_dedup_graph()
     result = dedup_app.invoke({
-        "raw_articles": [],
+        "raw_articles": state["info"]["ingestion"]["raw_articles"],
         "embeddings": None,
         "clusters": [],
         "unique_stories": []
@@ -69,7 +69,7 @@ def run_impact_mapping(state: PipelineState) -> PipelineState:
     """Run impact mapping agent"""
     impact_app = build_impact_mapping_graph()
     result = impact_app.invoke({
-        "entities": [],
+        "entities": state["info"]["ner"]["extended_ner"],
         "computed_impacts": [],
         "saved_count": 0
     })
