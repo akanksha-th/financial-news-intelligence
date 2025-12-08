@@ -36,6 +36,7 @@ def run_ingestion(state: PipelineState) -> PipelineState:
         "saved_count": 0
     })
     state["info"]["ingestion"] = result
+    # print(result["raw_articles"][:3])
     return state
 
 @retry(times=3)
@@ -43,7 +44,7 @@ def run_deduplication(state: PipelineState) -> PipelineState:
     """Runs deduplication agent"""
     dedup_app = build_dedup_graph()
     result = dedup_app.invoke({
-        "raw_articles": state["info"]["ingestion"]["raw_articles"],
+        "raw_articles": [],
         "embeddings": None,
         "clusters": [],
         "unique_stories": []
@@ -56,7 +57,7 @@ def run_entity_extraction(state: PipelineState) -> PipelineState:
     """Run entity extraction agent"""
     ner_app = build_entity_graph()
     result = ner_app.invoke({
-        "stories": state["info"]["dedup"]["unique_stories"],
+        "stories": [],
         "ner_result": [],
         "extended_ner": [],
         "saved_count": 0
@@ -69,7 +70,7 @@ def run_impact_mapping(state: PipelineState) -> PipelineState:
     """Run impact mapping agent"""
     impact_app = build_impact_mapping_graph()
     result = impact_app.invoke({
-        "entities": state["info"]["ner"]["extended_ner"],
+        "entities": [],
         "computed_impacts": [],
         "saved_count": 0
     })

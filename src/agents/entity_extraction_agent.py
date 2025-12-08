@@ -18,10 +18,7 @@ class EntityExtractionAgent(TypedDict):
 
 def fetch_stories(state: EntityExtractionAgent) -> EntityExtractionAgent:
     """Fetches stories from the database"""
-    stories = state["stories"]
-    if stories == []:
-        stories = fetch_unique_stories(limit=None)
-
+    stories = fetch_unique_stories(limit=None)
     state["stories"] = stories
     print(f"[NER Agent] Loaded {len(stories)} unique stories.")
     return state

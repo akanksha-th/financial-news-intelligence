@@ -20,10 +20,7 @@ class DeDupState(TypedDict):
 
 def load_articles(state: DeDupState) -> DeDupState:
     """Fetches raw articles from the database"""
-    rows = state["raw_articles"]
-    if rows == []:
-        rows = fetch_raw_articles()
-
+    rows = fetch_raw_articles()
     state["raw_articles"] = rows
     print(f"[DeDup Agent] Loaded {len(rows)} raw articles.")
 
@@ -83,6 +80,7 @@ def save_stories(state: DeDupState) -> DeDupState:
 
     for cluster in clusters:
         articles = [df[i] for i in cluster]
+        # print(articles[:3])
         story = {
             "article_ids": [a["id"] for a in articles],
             "article_title": articles[0]["title"],
