@@ -1,7 +1,10 @@
-from flask import Blueprint, render_template, request, jsonify
+from flask import (
+    Blueprint, render_template, 
+    Response, jsonify, stream_with_context
+)
 from src.pipelines import build_end_to_end_pipeline
 from datetime import datetime
-import threading
+import threading, yaml
 
 pipeline_bp = Blueprint("pipeline", __name__)
 
@@ -19,29 +22,45 @@ def pipeline_page():
 
 
 # ------Run Pipeline -------
-def run_pipeline_background():
-    """Runs in a background thread so browser does not freeze"""
+def run_pipeline_stream():
+    yield "event: message\ndata: Starting pipeline...\n\n"
+
+    pipeline = build_end_to_end_pipeline()
+
     try:
-        app = build_end_to_end_pipeline()
-        app.invoke({})
+        yield "event: message\ndata: Loading rss_feeds.yaml...\n\n"
+
+        with open("rss_feeds.yaml", "r") as f:
+            rss_feeds = yaml.safe_load(f)
+
+        init_state = {
+            "rss_feeds": rss_feeds,
+            "info": {}
+        }
+        yield "event: message\ndata: RSS feeds loaded. Starting Ingestion...\n\n"
+    
+    except Exception as e:
+        yield f"event: error\ndata: Failed to load RSS feeds: {e}\n\n"
+        return
+
+    # run pipeline and stream messages after each node
+    try:
+        final_state = pipeline.invoke(init_state)
 
         PIPELINE_STATE["last_run_time"] = datetime.utcnow().isoformat()
-        PIPELINE_STATE["last_status"] ="success"
+        PIPELINE_STATE["last_status"] = "success"
         PIPELINE_STATE["last_error"] = None
 
+        yield "event: message\ndata: Pipeline completed successfully.\n\n"
+        yield f"event: done\ndata: {final_state}\n\n"
     except Exception as e:
         PIPELINE_STATE["last_run_time"] = datetime.utcnow().isoformat()
         PIPELINE_STATE["last_status"] = "error"
         PIPELINE_STATE["last_error"] = str(e)
 
+        yield f"event: error\ndata: Pipeline error: {e}\n\n"
 
-@pipeline_bp.route("/pipeline/run", methods=["POST"])
-def run_pipeline():
-    """Triggers the pipeline in a background thread"""
-    t = threading.Thread(target=run_pipeline_background)
-    t.start()
 
-    return jsonify({
-        "status": "Pipelien started",
-        "timestamp": datetime.utcnow().isoformat()
-    })
+@pipeline_bp.route("/run/stream", methods=["GET"])
+def pipeline_stream():
+    return Response(stream_with_context(run_pipeline_stream()), mimetype="text/event-stream")

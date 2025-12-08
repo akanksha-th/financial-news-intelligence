@@ -1,9 +1,9 @@
-{% extends base.html %}
+{% extends "base.html" %}
 {% block content %}
 
 <h1>Pipeline Control</h1>
 
-<form action="/pipeline/run" method="POST">
+<form action="/run/stream" method="GET">
     <button type="submit">Run Pipeline</button>
 </form>
 

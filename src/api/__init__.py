@@ -1,4 +1,5 @@
 from flask import Flask
+from .routes.index_routes import index_bp
 from .routes.pipeline_routes import pipeline_bp
 from .routes.query_routes import query_bp
 from .routes.system_routes import system_bp
@@ -11,6 +12,7 @@ def create_app():
         static_folder="static"
     )
 
+    app.register_blueprint(index_bp)
     app.register_blueprint(pipeline_bp)
     app.register_blueprint(query_bp)
     app.register_blueprint(system_bp)
