@@ -332,15 +332,12 @@ def fetch_stories_by_ids(ids: List[int]) -> List[Dict[str, Any]]:
     """
     if not ids:
         return []
-
-    ids_tuple = tuple(ids)
-    # Use parameterized query for safety
     if _HAS_PG:
         sql = "SELECT * FROM unique_news WHERE id = ANY(%s);"
         # Using ANY preserves no order - we'll reorder later
         with get_db_connection() as conn:
             cur = conn.cursor(cursor_factory=RealDictCursor)
-            cur.execute(sql, (ids_tuple,))
+            cur.execute(sql, (ids,))
             rows = cur.fetchall()
             cur.close()
         # reorder rows to match ids
