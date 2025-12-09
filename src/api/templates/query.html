@@ -1,17 +1,111 @@
-{% extends "base.html" %}
-{% block content %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>News Query</title>
 
-<h1>Query Insights</h1>
+  <!-- Bootstrap CSS (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-<form method="GET" action="/query/search">
-    <input name="q" placeholder="Search entities or stories">
-    <button type="submit">Search</button>
-</form>
+  <style>
+    /* ensure summary column wraps and has fixed max height/width behaviour */
+    .summary-td {
+      white-space: pre-wrap;     /* preserve \n as breaks, already converted to <br> server-side */
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      max-width: 60ch;           /* controls visual width of summary column */
+      vertical-align: top;
+    }
+    .title-td {
+      word-wrap: break-word;
+      max-width: 28ch;
+      vertical-align: top;
+    }
+    .score-td {
+      text-align: right;
+      vertical-align: top;
+      font-family: monospace;
+    }
+    /* small visual niceties */
+    .spinner { display:none; }
+    .no-results { color: #666; margin-top: 1rem; }
+  </style>
+</head>
+<body class="bg-light">
+  <div class="container py-4">
+    <h2 class="mb-3">Financial News Query</h2>
 
-<div id="results">
-    {% if results %}
-    <pre>{{ results }}</pre>
-    {% endif %}
-</div>
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="mb-2">
+          <label for="queryInput" class="form-label">Enter your query</label>
+          <input id="queryInput" class="form-control" placeholder="e.g. HDFC Bank repo rate changes" />
+        </div>
+        <div class="d-flex gap-2">
+          <button id="runBtn" class="btn btn-primary">Run</button>
+          <div id="spinner" class="spinner-border spinner text-primary spinner" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <div id="countBadge" class="ms-auto align-self-center"></div>
+        </div>
+      </div>
+    </div>
 
-{% endblock %}
+    <div id="results" class="mb-5">
+      <!-- HTML table will be injected here -->
+      <div class="no-results">No results yet. Run a query.</div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS (optional) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    const runBtn = document.getElementById("runBtn");
+    const queryInput = document.getElementById("queryInput");
+    const spinner = document.getElementById("spinner");
+    const resultsDiv = document.getElementById("results");
+    const countBadge = document.getElementById("countBadge");
+
+    async function runQuery() {
+      const q = queryInput.value.trim();
+      if (!q) return alert("Please enter a query.");
+
+      spinner.style.display = "inline-block";
+      runBtn.disabled = true;
+      resultsDiv.innerHTML = "";
+
+      try {
+        const res = await fetch("/query", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: q })
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          resultsDiv.innerHTML = `<div class="alert alert-danger">Error: ${err.error || res.statusText}</div>`;
+          return;
+        }
+
+        const payload = await res.json();
+        // payload.html is safe because server escaped DB content.
+        resultsDiv.innerHTML = payload.html || "<div class='no-results'>No results</div>";
+
+        // show count
+        const count = payload.retrieved_news_count || 0;
+        countBadge.innerHTML = `<span class="badge bg-secondary">Results: ${count}</span>`;
+      } catch (e) {
+        resultsDiv.innerHTML = `<div class="alert alert-danger">Request failed: ${e.message}</div>`;
+      } finally {
+        spinner.style.display = "none";
+        runBtn.disabled = false;
+      }
+    }
+
+    runBtn.addEventListener("click", runQuery);
+    queryInput.addEventListener("keydown", (e) => { if (e.key === "Enter") runQuery(); });
+  </script>
+</body>
+</html>
