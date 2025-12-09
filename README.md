@@ -142,5 +142,5 @@ python run.py
 
 ## **Post-Hackathon Update**
 
-_The official hackathon submission deadline was December 4th. At the time of submission, several components of the system, including parts of the impact-mapping pipeline and the final unified retrieval flow were incomplete._
+_The official hackathon submission deadline was December 4th. At the time of submission, several components of the system, including UI and the final unified retrieval flow were incomplete._
 _The remaining components have now been implemented after the deadline to bring the project to a functional and well-structured state._
