@@ -1,14 +1,24 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Financial News Intelligence</h1>
 
-<p>Welcome to the system. Choose an action:</p>
+<div class="home-container">
+    <div class="card hero">
+        <h1 class="title">Financial News Intelligence System</h1>
+        <p class="subtitle">
+            End-to-end pipeline for financial news ingestion, deduplication,
+            entity extraction, impact mapping, and intelligent querying.
+        </p>
+    </div>
 
-<ul>
-    <li><a href="/pipeline">Run Pipeline</a></li>
-    <li><a href="/query">Ask a Query</a></li>
-    <li><a href="/health">System Health</a></li>
-</ul>
+    <div class="card actions">
+        <h2 class="section-title">Actions</h2>
+        <div class="button-grid">
+            <a class="btn primary" href="/pipeline">Run Pipeline</a>
+            <a class="btn primary" href="/query">Ask a Query</a>
+            <a class="btn primary" href="/health">System Health</a>
+        </div>
+    </div>
+</div>
 
 {% endblock %}

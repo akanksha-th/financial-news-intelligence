@@ -10,6 +10,15 @@
 
   <style>
     /* ensure summary column wraps and has fixed max height/width behaviour */
+    /* GLOBAL DARK THEME */
+    .bg-dark {
+        background-color: #000;
+        color: #e6e6e6;
+        font-family: "Inter", Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    
     .summary-td {
       white-space: pre-wrap;     /* preserve \n as breaks, already converted to <br> server-side */
       word-wrap: break-word;
@@ -32,7 +41,7 @@
     .no-results { color: #666; margin-top: 1rem; }
   </style>
 </head>
-<body class="bg-light">
+<body class="bg-dark">
   <div class="container py-4">
     <h2 class="mb-3">Financial News Query</h2>
 

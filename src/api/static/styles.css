@@ -1,34 +1,93 @@
-* {
-    box-sizing: border-box;
-}
-
+/* GLOBAL DARK THEME */
 body {
-    font-family: sans-serif;
-    font-size: 20px;
-    margin: 0 auto;
-    text-align: center;
+    background-color: #000;
+    color: #e6e6e6;
+    font-family: "Inter", Arial, sans-serif;
+    margin: 0;
+    padding: 0;
 }
 
-a,
-a:visited {
-    color: #007bff;
+/* CENTER PAGE WRAPPER */
+.home-center-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 90vh;
+    text-align: center;
+    width: 100%;
+}
+
+/* CARD STYLING */
+.card {
+    background: #111;
+    padding: 35px 40px;
+    margin: 20px 0;
+    border-radius: 14px;
+    border: 1px solid #2a2a2a;
+    max-width: 650px;
+    width: 90%;
+    box-shadow: 0 0 22px rgba(0, 0, 0, 0.7);
+}
+
+/* HERO TEXT */
+.title {
+    font-size: 2.4rem;
+    margin-bottom: 12px;
+    color: #fff;
+}
+
+.subtitle {
+    color: #b3b3b3;
+    font-size: 1rem;
+}
+
+/* ACTIONS SECTION */
+.section-title {
+    font-size: 1.4rem;
+    margin-bottom: 25px;
+    color: #e6e6e6;
+}
+
+/* CENTERED BUTTON GRID */
+.button-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+}
+
+.center-buttons {
+    justify-content: center;
+}
+
+/* BUTTONS */
+.btn {
+    display: inline-block;
+    padding: 14px 28px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+}
+
+/* PRIMARY BUTTON (Blue Neon) */
+.btn.primary {
+    background: #0059ff;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(0, 90, 255, 0.5);
+}
+
+.btn.primary:hover {
+    background: #003fcc;
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(0, 90, 255, 0.8);
+}
+
+/* LINKS */
+a {
+    color: #61a6ff;
 }
 
 a:hover {
-    color: #0056b3;
-}
-
-nav ul {
-    list-style-type: none;
-    padding: 2px;
-}
-
-nav ul li {
-    display: inline;
-    margin: 0 5px;
-}
-
-main {
-    width: 80%;
-    margin: 0 auto;
+    color: #8ac3ff;
 }
