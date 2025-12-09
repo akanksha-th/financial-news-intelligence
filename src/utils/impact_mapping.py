@@ -15,6 +15,7 @@ SYMBOL_TO_SECTOR_PATH = os.path.join(ASSETS_DIR, "symbol_to_sector.json")
 SECTOR_TO_SYMBOLS_PATH = os.path.join(ASSETS_DIR, "sector_to_symbols.json")
 REGULATOR_RULES_PATH = os.path.join(ASSETS_DIR, "regulator_impact_rules.json")
 POLICY_RULES_PATH = os.path.join(ASSETS_DIR, "policy_impact_rules.json")
+SYMBOL_TO_COMPANY_PATH = os.path.join(ASSETS_DIR, "symbol_to_company.json")
 # print("All paths are correct!")
 
 SCORES = {
@@ -43,8 +44,10 @@ def load_mapping():
     regulator_rules = load_safe_json(REGULATOR_RULES_PATH)
     policy_rules = load_safe_json(POLICY_RULES_PATH)
     sector_to_symbols = load_safe_json(SECTOR_TO_SYMBOLS_PATH)
+    symbol_to_company = load_safe_json(SYMBOL_TO_COMPANY_PATH)
 
-    return company_to_symbol, symbol_to_sector, regulator_rules, policy_rules, sector_to_symbols
+
+    return company_to_symbol, symbol_to_sector, regulator_rules, policy_rules, sector_to_symbols, symbol_to_company
 
 def normalize_name(name: str) -> str:
     if not name:
@@ -86,7 +89,8 @@ def compute_impacts_for_entities(entities: Dict[str, Any],
                                  regulator_rules: Dict[str, Dict],
                                  policy_rules: Dict[str, Dict],
                                  sector_to_symbols: Dict[str, List[str]] = None,
-                                 index_to_symbols: Dict[str, List[str]] = None) -> List[Dict[str, Any]]:
+                                 index_to_symbols: Dict[str, List[str]] = None,
+                                 symbol_to_company: Dict[str, str] = None) -> List[Dict[str, Any]]:
     company_to_symbol = company_to_symbol or {}
     symbol_to_sector = symbol_to_sector or {}
     regulator_rules = regulator_rules or {}
@@ -204,7 +208,7 @@ def format_impacts_list(impacts: List[Dict[str, Any]], max_items: int = 20) -> L
 
 
 if __name__ =="__main__":
-    company_to_symbol, symbol_to_sector, reg_rules, pol_rules, sector_to_symbols = load_mapping()
+    company_to_symbol, symbol_to_sector, reg_rules, pol_rules, sector_to_symbols, symbol_to_company = load_mapping()
 
     entities = {
     "companies": ["HDFC Bank"],

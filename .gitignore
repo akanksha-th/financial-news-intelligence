@@ -53,6 +53,7 @@ data/**/*.db*
 # MODELS
 # -----------------------------
 models/
+src/query_system/
 
 # -----------------------------
 # VECTOR STORES / RAG INDEXES
