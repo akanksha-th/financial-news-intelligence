@@ -13,27 +13,26 @@
 </div>
 
 <script>
-    function runPipeline() {
-        const logBox = document.getElementById("log-box")
+function runPipeline() {
+    const logBox = document.getElementById("log-box");
 
-        // create SSE connection
-        const source = new EventSource("/pipeline");
-        
-        source.onmessage = function(event) {
-            logBox.textContent += event.data + "\n";
-            logBox.scrollTop = logBox.scrollHeight;
-        };
-        
-        source.addEventListener("error", function(event) {
-            logBox.textContent += "\n--- ERROR: Check backend logs ---\n";
-            source.close();
-        });
-        
-        souce.addEventListener("done", function(event) {
-            logBox.textContent += "\n--- PIPELINE FINISHED ---\n";
-            source.close();
-        });
-    }
+    const source = new EventSource("/pipeline/run/stream");
+
+    source.onmessage = function(event) {
+        logBox.textContent += event.data + "\n";
+        logBox.scrollTop = logBox.scrollHeight;
+    };
+
+    source.addEventListener("done", function(event) {
+        logBox.textContent += "\n--- PIPELINE FINISHED ---\n";
+        source.close();
+    });
+
+    source.addEventListener("error", function(event) {
+        logBox.textContent += "\n--- ERROR: Check backend logs ---\n";
+        source.close();
+    });
+}
 </script>
 
 {% endblock %}

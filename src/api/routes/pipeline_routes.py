@@ -63,7 +63,15 @@ def run_pipeline_stream():
 
         yield f"event: error\ndata: Pipeline error: {e}\n\n"
 
-
 @pipeline_bp.route("/pipeline/run/stream", methods=["GET"])
 def pipeline_stream():
-    return Response(stream_with_context(run_pipeline_stream()), mimetype="text/event-stream")
+    response = Response(
+        stream_with_context(run_pipeline_stream()),
+        mimetype="text/event-stream"
+    )
+
+    response.headers["Cache-Control"] = "no-cache"
+    response.headers["X-Accel-Buffering"] = "no"
+    response.headers["Connection"] = "keep-alive"
+
+    return response
