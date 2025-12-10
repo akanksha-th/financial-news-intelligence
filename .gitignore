@@ -31,13 +31,12 @@ ENV/
 *.ipynb_checkpoints/*
 
 # Avoid saving huge notebook output cells
-# (Optional, but recommended if notebooks get large)
 **/.ipynb_checkpoints/*
 *.nb.html
 */.jupyter_cache/
 
 # -----------------------------
-# DATABASES (VERY IMPORTANT)
+# DATABASES
 # -----------------------------
 data/
 data/*.db
